@@ -1,10 +1,25 @@
 package jskills.trueskill;
 
-import jskills.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import jskills.GameInfo;
+import jskills.Guard;
+import jskills.PairwiseComparison;
+import static jskills.PairwiseComparison.DRAW;
+import static jskills.PairwiseComparison.LOSE;
+import static jskills.PairwiseComparison.WIN;
+import jskills.Player;
+import jskills.RankSorter;
+import jskills.Rating;
+import jskills.SkillCalculator;
+import jskills.SkillCalculator.SupportedOptions;
+import jskills.Team;
 import jskills.numerics.Range;
 
-import java.util.*;
-import java.util.Map.Entry;
 
 import static jskills.numerics.MathUtils.square;
 
@@ -17,23 +32,23 @@ import static jskills.numerics.MathUtils.square;
 public class TwoTeamTrueSkillCalculator extends SkillCalculator {
 
     public TwoTeamTrueSkillCalculator() {
-        super(EnumSet.noneOf(SupportedOptions.class), Range.<ITeam>exactly(2), Range.<IPlayer>atLeast(1));
+        super(EnumSet.noneOf(SupportedOptions.class), Range.<Team>exactly(2), Range.<Player>atLeast(1));
     }
 
     @Override
-    public Map<IPlayer, Rating> calculateNewRatings(GameInfo gameInfo, Collection<ITeam> teams, int... teamRanks) {
+    public Map<Player, Rating> calculateNewRatings(GameInfo gameInfo, Collection<Team> teams, int... teamRanks) {
 
         Guard.argumentNotNull(gameInfo, "gameInfo");
         validateTeamCountAndPlayersCountPerTeam(teams);
 
-        List<ITeam> teamsl = RankSorter.sort(teams, teamRanks);
+        List<Team> teamsl = RankSorter.sort(teams, teamRanks);
 
-        ITeam team1 = teamsl.get(0);
-        ITeam team2 = teamsl.get(1);
+        Team team1 = teamsl.get(0);
+        Team team2 = teamsl.get(1);
 
         boolean wasDraw = (teamRanks[0] == teamRanks[1]);
 
-        HashMap<IPlayer, Rating> results = new HashMap<IPlayer, Rating>();
+        HashMap<Player, Rating> results = new HashMap<Player, Rating>();
 
         updatePlayerRatings(gameInfo,
                 results,
@@ -51,9 +66,9 @@ public class TwoTeamTrueSkillCalculator extends SkillCalculator {
     }
 
     private static void updatePlayerRatings(GameInfo gameInfo,
-                                            Map<IPlayer, Rating> newPlayerRatings,
-                                            ITeam selfTeam,
-                                            ITeam otherTeam,
+                                            Map<Player, Rating> newPlayerRatings,
+                                            Team selfTeam,
+                                            Team otherTeam,
                                             PairwiseComparison selfToOtherTeamComparison) {
         double drawMargin = DrawMargin.GetDrawMarginFromDrawProbability(gameInfo.getDrawProbability(), gameInfo.getBeta());
         double betaSquared = square(gameInfo.getBeta());
@@ -62,13 +77,13 @@ public class TwoTeamTrueSkillCalculator extends SkillCalculator {
         int totalPlayers = selfTeam.size() + otherTeam.size();
 
         double selfMeanSum = 0;
-        for (Rating r : selfTeam.values()) selfMeanSum += r.getMean();
+        for (Rating r : selfTeam.getRatings()) selfMeanSum += r.getMean();
         double otherTeamMeanSum = 0;
-        for (Rating r : otherTeam.values()) otherTeamMeanSum += r.getMean();
+        for (Rating r : otherTeam.getRatings()) otherTeamMeanSum += r.getMean();
 
         double sum = 0;
-        for (Rating r : selfTeam.values()) sum += square(r.getStandardDeviation());
-        for (Rating r : otherTeam.values()) sum += square(r.getStandardDeviation());
+        for (Rating r : selfTeam.getRatings()) sum += square(r.getStandardDeviation());
+        for (Rating r : otherTeam.getRatings()) sum += square(r.getStandardDeviation());
         
         double c = Math.sqrt(sum + totalPlayers*betaSquared);
 
@@ -102,8 +117,8 @@ public class TwoTeamTrueSkillCalculator extends SkillCalculator {
             rankMultiplier = 1;
         }
 
-        for(Entry<IPlayer, Rating> teamPlayerRatingPair : selfTeam.entrySet()) {
-            Rating previousPlayerRating = teamPlayerRatingPair.getValue();
+        for (Player teamPlayer : selfTeam.getPlayers()) {
+            Rating previousPlayerRating = selfTeam.getRating(teamPlayer);
 
             double meanMultiplier = (square(previousPlayerRating.getStandardDeviation()) + tauSquared)/c;
             double stdDevMultiplier = (square(previousPlayerRating.getStandardDeviation()) + tauSquared)/square(c);
@@ -114,23 +129,23 @@ public class TwoTeamTrueSkillCalculator extends SkillCalculator {
             double newStdDev =
                 Math.sqrt((square(previousPlayerRating.getStandardDeviation()) + tauSquared)*(1 - w*stdDevMultiplier));
 
-            newPlayerRatings.put(teamPlayerRatingPair.getKey(), new Rating(newMean, newStdDev));
+            newPlayerRatings.put(teamPlayer, new Rating(newMean, newStdDev));
         }
     }
 
     @Override
-    public double calculateMatchQuality(GameInfo gameInfo, Collection<ITeam> teams) {
+    public double calculateMatchQuality(GameInfo gameInfo, Collection<Team> teams) {
 
         Guard.argumentNotNull(gameInfo, "gameInfo");
         validateTeamCountAndPlayersCountPerTeam(teams);
 
-        Iterator<ITeam> teamsIt = teams.iterator();
+        Iterator<Team> teamsIt = teams.iterator();
         
         // We've verified that there's just two teams
-        Collection<Rating> team1 = teamsIt.next().values();
+        Collection<Rating> team1 = teamsIt.next().getRatings();
         int team1Count = team1.size();
 
-        Collection<Rating> team2 = teamsIt.next().values();
+        Collection<Rating> team2 = teamsIt.next().getRatings();
         int team2Count = team2.size();
 
         int totalPlayers = team1Count + team2Count;

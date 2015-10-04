@@ -1,41 +1,45 @@
 package jskills.trueskill.layers;
 
-import jskills.IPlayer;
-import jskills.ITeam;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import jskills.Rating;
-import jskills.factorgraphs.*;
 import jskills.numerics.GaussianDistribution;
 import jskills.numerics.MathUtils;
 import jskills.trueskill.TrueSkillFactorGraph;
 import jskills.trueskill.factors.GaussianPriorFactor;
+import jskills.Player;
+import jskills.Team;
+import jskills.factorgraphs.DefaultVariable;
+import jskills.factorgraphs.KeyedVariable;
+import jskills.factorgraphs.Schedule;
+import jskills.factorgraphs.ScheduleStep;
+import jskills.factorgraphs.Variable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
 
 // We intentionally have no Posterior schedule since the only purpose here is to 
 public class PlayerPriorValuesToSkillsLayer extends
     TrueSkillFactorGraphLayer<DefaultVariable<GaussianDistribution>, 
                               GaussianPriorFactor,
-                              KeyedVariable<IPlayer, GaussianDistribution>> {
+                              KeyedVariable<Player, GaussianDistribution>> {
 
-    private final Collection<ITeam> teams;
+    private final Collection<Team> teams;
 
-    public PlayerPriorValuesToSkillsLayer(TrueSkillFactorGraph parentGraph, Collection<ITeam> teams) {
+    public PlayerPriorValuesToSkillsLayer(TrueSkillFactorGraph parentGraph, Collection<Team> teams) {
         super(parentGraph);
         this.teams = teams;
     }
 
     @Override
     public void buildLayer() {
-        for(ITeam currentTeam : teams) {
-            List<KeyedVariable<IPlayer, GaussianDistribution>> currentTeamSkills = new ArrayList<>();
+        for(Team currentTeam : teams) {
+            List<KeyedVariable<Player, GaussianDistribution>> currentTeamSkills = new ArrayList<>();
 
-            for(Entry<IPlayer, Rating> currentTeamPlayer : currentTeam.entrySet()) {
-                KeyedVariable<IPlayer, GaussianDistribution> playerSkill =
-                    createSkillOutputVariable(currentTeamPlayer.getKey());
-                AddLayerFactor(createPriorFactor(currentTeamPlayer.getKey(), currentTeamPlayer.getValue(), playerSkill));
+            for (Player currentTeamPlayer : currentTeam.getPlayers()) {
+                KeyedVariable<Player, GaussianDistribution> playerSkill =
+                    createSkillOutputVariable(currentTeamPlayer);
+                AddLayerFactor(createPriorFactor(currentTeamPlayer, currentTeam.getRating(currentTeamPlayer), playerSkill));
                 currentTeamSkills.add(playerSkill);
             }
 
@@ -52,14 +56,14 @@ public class PlayerPriorValuesToSkillsLayer extends
         return ScheduleSequence(schedules, "All priors");
     }
 
-    private GaussianPriorFactor createPriorFactor(IPlayer player, Rating priorRating,
+    private GaussianPriorFactor createPriorFactor(Player player, Rating priorRating,
                                                   Variable<GaussianDistribution> skillsVariable) {
         return new GaussianPriorFactor(priorRating.getMean(),
                                        MathUtils.square(priorRating.getStandardDeviation()) +
                                        MathUtils.square(getParentFactorGraph().getGameInfo().getDynamicsFactor()), skillsVariable);
     }
 
-    private KeyedVariable<IPlayer, GaussianDistribution> createSkillOutputVariable(IPlayer key) {
+    private KeyedVariable<Player, GaussianDistribution> createSkillOutputVariable(Player key) {
         return new KeyedVariable<>(key, GaussianDistribution.UNIFORM, "%s's skill", key.toString());
     }
 }

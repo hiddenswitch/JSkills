@@ -5,17 +5,16 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import jskills.GameInfo;
-import jskills.IPlayer;
-import jskills.ITeam;
 import jskills.PairwiseComparison;
 import jskills.Player;
+import jskills.PlayerInfo;
 import jskills.RankSorter;
 import jskills.Rating;
 import jskills.SkillCalculator;
 import jskills.Team;
+import jskills.TeamInfo;
 import jskills.numerics.MathUtils;
 import jskills.numerics.Range;
 
@@ -24,13 +23,13 @@ public class DuellingEloCalculator extends SkillCalculator {
     private final TwoPlayerEloCalculator twoPlayerEloCalc;
 
     public DuellingEloCalculator(TwoPlayerEloCalculator twoPlayerEloCalculator) {
-        super(EnumSet.noneOf(SupportedOptions.class), Range.<ITeam>atLeast(2), Range.<IPlayer>atLeast(1));
+        super(EnumSet.noneOf(SupportedOptions.class), Range.<Team>atLeast(2), Range.<Player>atLeast(1));
         twoPlayerEloCalc = twoPlayerEloCalculator;
     }
 
     @Override
-    public Map<IPlayer, Rating> calculateNewRatings(GameInfo gameInfo,
-            Collection<ITeam> teams, int... teamRanks) {
+    public Map<Player, Rating> calculateNewRatings(GameInfo gameInfo,
+            Collection<Team> teams, int... teamRanks) {
         // On page 6 of the TrueSkill paper, the authors write:
         /* "When we had to process a team game or a game with more than two 
          * teams we used the so-called *duelling* heuristic: For each player, 
@@ -41,10 +40,10 @@ public class DuellingEloCalculator extends SkillCalculator {
         // This implements that algorithm.
 
         validateTeamCountAndPlayersCountPerTeam(teams);
-        List<ITeam> teamsl = RankSorter.sort(teams, teamRanks);
-        ITeam[] teamsList = teamsl.toArray(new ITeam[0]);
+        List<Team> teamsl = RankSorter.sort(teams, teamRanks);
+        Team[] teamsList = teamsl.toArray(new Team[0]);
 
-        Map<IPlayer, Map<IPlayer, Double>> deltas = new HashMap<IPlayer, Map<IPlayer, Double>>();
+        Map<Player, Map<Player, Double>> deltas = new HashMap<Player, Map<Player, Double>>();
 
         for (int ixCurrentTeam = 0; ixCurrentTeam < teamsList.length; ixCurrentTeam++) {
             for (int ixOtherTeam = 0; ixOtherTeam < teamsList.length; ixOtherTeam++) {
@@ -53,31 +52,31 @@ public class DuellingEloCalculator extends SkillCalculator {
                     continue;
                 }
 
-                ITeam currentTeam = teamsList[ixCurrentTeam];
-                ITeam otherTeam = teamsList[ixOtherTeam];
+                Team currentTeam = teamsList[ixCurrentTeam];
+                Team otherTeam = teamsList[ixOtherTeam];
 
                 // Remember that bigger numbers mean worse rank (e.g. other-current is what we want)
                 PairwiseComparison comparison = PairwiseComparison.fromMultiplier((int) Math.signum(teamRanks[ixOtherTeam] - teamRanks[ixCurrentTeam]));
 
-                for (Entry<IPlayer, Rating> currentTeamPlayerRatingPair : currentTeam.entrySet()) {
-                    for (Entry<IPlayer, Rating> otherTeamPlayerRatingPair : otherTeam.entrySet()) {
+                for (Player currentTeamPlayer : currentTeam.getPlayers()) {
+                    for (Player otherTeamPlayer: otherTeam.getPlayers()) {
                         updateDuels(gameInfo, deltas,
-                                currentTeamPlayerRatingPair.getKey(),
-                                currentTeamPlayerRatingPair.getValue(),
-                                otherTeamPlayerRatingPair.getKey(),
-                                otherTeamPlayerRatingPair.getValue(),
+                                currentTeamPlayer,
+                                currentTeam.getRating(currentTeamPlayer),
+                                otherTeamPlayer,
+                                otherTeam.getRating(otherTeamPlayer),
                                 comparison);
                     }
                 }
             }
         }
         
-        Map<IPlayer, Rating> result = new HashMap<IPlayer, Rating>();
+        Map<Player, Rating> result = new HashMap<Player, Rating>();
 
-        for (ITeam currentTeam : teamsList) {
-            for (Entry<IPlayer, Rating> currentTeamPlayerPair : currentTeam.entrySet()) {
-                double currentPlayerAverageDuellingDelta = MathUtils.mean(deltas.get(currentTeamPlayerPair.getKey()).values());
-                result.put(currentTeamPlayerPair.getKey(), new EloRating(currentTeamPlayerPair.getValue().getMean() + currentPlayerAverageDuellingDelta));
+        for (Team currentTeam : teamsList) {
+            for (Player currentTeamPlayer : currentTeam.getPlayers()) {
+                double currentPlayerAverageDuellingDelta = MathUtils.mean(deltas.get(currentTeamPlayer).values());
+                result.put(currentTeamPlayer, new EloRating(currentTeam.getRating(currentTeamPlayer).getMean() + currentPlayerAverageDuellingDelta));
             }
         }
 
@@ -85,12 +84,12 @@ public class DuellingEloCalculator extends SkillCalculator {
     }
     
     private void updateDuels(GameInfo gameInfo,
-            Map<IPlayer, Map<IPlayer, Double>> duels, IPlayer player1,
-            Rating player1Rating, IPlayer player2, Rating player2Rating,
+            Map<Player, Map<Player, Double>> duels, Player player1,
+            Rating player1Rating, Player player2, Rating player2Rating,
             PairwiseComparison weakToStrongComparison) {
         
-        Map<IPlayer, Rating> duelOutcomes = twoPlayerEloCalc.calculateNewRatings(gameInfo, 
-            Team.concat(new Team(player1, player1Rating), new Team(player2, player2Rating)),
+        Map<Player, Rating> duelOutcomes = twoPlayerEloCalc.calculateNewRatings(gameInfo,
+            TeamInfo.concat(new TeamInfo().addPlayer(player1, player1Rating), new TeamInfo().addPlayer(player2, player2Rating)),
             (weakToStrongComparison == PairwiseComparison.WIN) ? new int[] { 1, 2 } :
                 (weakToStrongComparison == PairwiseComparison.LOSE) ? new int[] { 2, 1 } :
                     new int[] { 1, 1});
@@ -100,12 +99,12 @@ public class DuellingEloCalculator extends SkillCalculator {
     }
 
     private static void updateDuelInfo(
-            Map<IPlayer, Map<IPlayer, Double>> duels, IPlayer self,
-            Rating selfBeforeRating, Rating selfAfterRating, IPlayer opponent) {
-        Map<IPlayer, Double> selfToOpponentDuelDeltas = duels.get(self);
+            Map<Player, Map<Player, Double>> duels, Player self,
+            Rating selfBeforeRating, Rating selfAfterRating, Player opponent) {
+        Map<Player, Double> selfToOpponentDuelDeltas = duels.get(self);
 
         if (selfToOpponentDuelDeltas == null) {
-            selfToOpponentDuelDeltas = new HashMap<IPlayer, Double>();
+            selfToOpponentDuelDeltas = new HashMap<Player, Double>();
             duels.put(self, selfToOpponentDuelDeltas);
         }
 
@@ -114,23 +113,23 @@ public class DuellingEloCalculator extends SkillCalculator {
 
     @Override
     public double calculateMatchQuality(GameInfo gameInfo,
-            Collection<ITeam> teams) {
+            Collection<Team> teams) {
         // HACK! Need a better algorithm, this is just to have something there and it isn't good
         double minQuality = 1.0;
 
-        ITeam[] teamList = teams.toArray(new ITeam[0]);
+        Team[] teamList = teams.toArray(new Team[0]);
 
         for (int ixCurrentTeam = 0; ixCurrentTeam < teamList.length; ixCurrentTeam++) {
-            EloRating currentTeamAverageRating = new EloRating(Rating.calcMeanMean(teamList[ixCurrentTeam].values()));;
-            Team currentTeam = new Team(new Player<Integer>(ixCurrentTeam), currentTeamAverageRating);
+            EloRating currentTeamAverageRating = new EloRating(Rating.calcMeanMean(teamList[ixCurrentTeam].getRatings()));;
+            Team currentTeam = new TeamInfo().addPlayer(new PlayerInfo(ixCurrentTeam), currentTeamAverageRating);
 
             for (int ixOtherTeam = ixCurrentTeam + 1; ixOtherTeam < teamList.length; ixOtherTeam++) {
-                EloRating otherTeamAverageRating = new EloRating(Rating.calcMeanMean(teamList[ixOtherTeam].values()));
-                Team otherTeam = new Team(new Player<Integer>(ixOtherTeam), otherTeamAverageRating);
+                EloRating otherTeamAverageRating = new EloRating(Rating.calcMeanMean(teamList[ixOtherTeam].getRatings()));
+                Team otherTeam = new TeamInfo().addPlayer(new PlayerInfo(ixOtherTeam), otherTeamAverageRating);
 
                 minQuality = Math.min(minQuality,
                                       twoPlayerEloCalc.calculateMatchQuality(gameInfo,
-                                                                              Team.concat(currentTeam, otherTeam)));
+                                                                              TeamInfo.concat(currentTeam, otherTeam)));
             }
         }
 

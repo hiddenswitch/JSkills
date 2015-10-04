@@ -13,6 +13,11 @@ public class FactorGraphTrueSkillCalculatorTests {
     }
 
     @Test
+    public void TestProbabilityOfOutcome() {
+        TrueSkillCalculatorTests.TestProbabilityOfOutcome(calculator);
+    }
+
+    @Test
     public void TestAllTwoTeamScenarios() {
         TrueSkillCalculatorTests.TestAllTwoTeamScenarios(calculator);
     }

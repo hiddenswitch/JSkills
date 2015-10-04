@@ -1,6 +1,5 @@
 package jskills.trueskill.layers;
 
-import jskills.IPlayer;
 import jskills.factorgraphs.KeyedVariable;
 import jskills.factorgraphs.Schedule;
 import jskills.factorgraphs.ScheduleStep;
@@ -12,11 +11,12 @@ import jskills.trueskill.factors.GaussianLikelihoodFactor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import jskills.Player;
 
 public class PlayerSkillsToPerformancesLayer extends
-    TrueSkillFactorGraphLayer<KeyedVariable<IPlayer, GaussianDistribution>, 
+    TrueSkillFactorGraphLayer<KeyedVariable<Player, GaussianDistribution>,
                               GaussianLikelihoodFactor,
-                              KeyedVariable<IPlayer, GaussianDistribution>> {
+                              KeyedVariable<Player, GaussianDistribution>> {
 
     public PlayerSkillsToPerformancesLayer(TrueSkillFactorGraph parentGraph)
     {
@@ -25,11 +25,11 @@ public class PlayerSkillsToPerformancesLayer extends
 
     @Override
     public void buildLayer() {
-        for(List<KeyedVariable<IPlayer, GaussianDistribution>> currentTeam : getInputVariablesGroups()) {
-            List<KeyedVariable<IPlayer, GaussianDistribution>> currentTeamPlayerPerformances = new ArrayList<>();
+        for(List<KeyedVariable<Player, GaussianDistribution>> currentTeam : getInputVariablesGroups()) {
+            List<KeyedVariable<Player, GaussianDistribution>> currentTeamPlayerPerformances = new ArrayList<>();
 
-            for(KeyedVariable<IPlayer, GaussianDistribution> playerSkillVariable : currentTeam) {
-                KeyedVariable<IPlayer, GaussianDistribution> playerPerformance =
+            for(KeyedVariable<Player, GaussianDistribution> playerSkillVariable : currentTeam) {
+                KeyedVariable<Player, GaussianDistribution> playerPerformance =
                     createOutputVariable(playerSkillVariable.getKey());
                 AddLayerFactor(createLikelihood(playerSkillVariable, playerPerformance));
                 currentTeamPlayerPerformances.add(playerPerformance);
@@ -39,12 +39,12 @@ public class PlayerSkillsToPerformancesLayer extends
         }
     }
 
-    private GaussianLikelihoodFactor createLikelihood(KeyedVariable<IPlayer, GaussianDistribution> playerSkill,
-                                                      KeyedVariable<IPlayer, GaussianDistribution> playerPerformance) {
+    private GaussianLikelihoodFactor createLikelihood(KeyedVariable<Player, GaussianDistribution> playerSkill,
+                                                      KeyedVariable<Player, GaussianDistribution> playerPerformance) {
         return new GaussianLikelihoodFactor(MathUtils.square(parentFactorGraph.getGameInfo().getBeta()), playerPerformance, playerSkill);
     }
 
-    private KeyedVariable<IPlayer, GaussianDistribution> createOutputVariable(IPlayer key) {
+    private KeyedVariable<Player, GaussianDistribution> createOutputVariable(Player key) {
         return new KeyedVariable<>(key, GaussianDistribution.UNIFORM, "%s's performance", key);
     }
 

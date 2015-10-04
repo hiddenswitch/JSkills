@@ -45,7 +45,8 @@ public abstract class FactorGraphLayer<TParentFactorGraph extends FactorGraph<TP
     }
     
     public void addOutputVariable(TOutputVariable var) {
-        List<TOutputVariable> g = new ArrayList<TOutputVariable>(1); g.add(var);
+        List<TOutputVariable> g = new ArrayList<TOutputVariable>(1);
+        g.add(var);
         addOutputVariableGroup(g);
     }
 
@@ -62,7 +63,7 @@ public abstract class FactorGraphLayer<TParentFactorGraph extends FactorGraph<TP
     @Override
     @SuppressWarnings("unchecked") // TODO there has to be a safer way to do this
     public void setRawInputVariablesGroups(Object value) {
-        inputVariablesGroups = (List<List<TInputVariable>>)value;
+        inputVariablesGroups = (List<List<TInputVariable>>) value;
     }
 
     @Override

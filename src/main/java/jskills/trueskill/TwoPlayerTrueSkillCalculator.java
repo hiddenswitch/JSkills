@@ -1,9 +1,23 @@
 package jskills.trueskill;
 
-import jskills.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import jskills.GameInfo;
+import jskills.Guard;
+import jskills.PairwiseComparison;
+import static jskills.PairwiseComparison.DRAW;
+import static jskills.PairwiseComparison.LOSE;
+import static jskills.PairwiseComparison.WIN;
+import jskills.Player;
+import jskills.RankSorter;
+import jskills.Rating;
+import jskills.SkillCalculator;
+import jskills.Team;
 import jskills.numerics.Range;
-
-import java.util.*;
 
 import static jskills.numerics.MathUtils.square;
 
@@ -17,30 +31,30 @@ import static jskills.numerics.MathUtils.square;
 public class TwoPlayerTrueSkillCalculator extends SkillCalculator
 {
     public TwoPlayerTrueSkillCalculator() {
-        super(EnumSet.noneOf(SupportedOptions.class), Range.<ITeam>exactly(2), Range.<IPlayer>exactly(1));
+        super(EnumSet.noneOf(SupportedOptions.class), Range.<Team>exactly(2), Range.<Player>exactly(1));
     }
 
     @Override
-    public Map<IPlayer, Rating> calculateNewRatings(GameInfo gameInfo, Collection<ITeam> teams, int... teamRanks) {
+    public Map<Player, Rating> calculateNewRatings(GameInfo gameInfo, Collection<Team> teams, int... teamRanks) {
         // Basic argument checking
         Guard.argumentNotNull(gameInfo, "gameInfo");
         validateTeamCountAndPlayersCountPerTeam(teams);
 
         // Make sure things are in order
-        List<ITeam> teamsl = RankSorter.sort(teams, teamRanks);
+        List<Team> teamsl = RankSorter.sort(teams, teamRanks);
 
         // Since we verified that each team has one player, we know the player is the first one
-        ITeam winningTeam = teamsl.get(0);
-        IPlayer winner = winningTeam.keySet().iterator().next();
-        Rating winnerPreviousRating = winningTeam.get(winner);
+        Team winningTeam = teamsl.get(0);
+        Player winner = winningTeam.getPlayer(0);
+        Rating winnerPreviousRating = winningTeam.getRating(winner);
 
-        Map<IPlayer, Rating> losingTeam = teamsl.get(1);
-        IPlayer loser = losingTeam.keySet().iterator().next();
-        Rating loserPreviousRating = losingTeam.get(loser);
+        Team losingTeam = teamsl.get(1);
+        Player loser = losingTeam.getPlayer(0);
+        Rating loserPreviousRating = losingTeam.getRating(loser);
 
         boolean wasDraw = (teamRanks[0] == teamRanks[1]);
 
-        Map<IPlayer, Rating> results = new HashMap<IPlayer, Rating>();
+        Map<Player, Rating> results = new HashMap<Player, Rating>();
         results.put(winner, calculateNewRating(gameInfo, winnerPreviousRating, loserPreviousRating,
                 wasDraw ? PairwiseComparison.DRAW : PairwiseComparison.WIN));
         results.put(loser, calculateNewRating(gameInfo, loserPreviousRating, winnerPreviousRating,
@@ -103,14 +117,14 @@ public class TwoPlayerTrueSkillCalculator extends SkillCalculator
     }
 
     @Override
-    public double calculateMatchQuality(GameInfo gameInfo, Collection<ITeam> teams) {
+    public double calculateMatchQuality(GameInfo gameInfo, Collection<Team> teams) {
         Guard.argumentNotNull(gameInfo, "gameInfo");
         validateTeamCountAndPlayersCountPerTeam(teams);
 
-        Iterator<ITeam> teamIt = teams.iterator();
+        Iterator<Team> teamIt = teams.iterator();
         
-        Rating player1Rating = teamIt.next().values().iterator().next();
-        Rating player2Rating = teamIt.next().values().iterator().next();
+        Rating player1Rating = teamIt.next().getRating(0);
+        Rating player2Rating = teamIt.next().getRating(0);
 
         // We just use equation 4.1 found on page 8 of the TrueSkill 2006 paper:
         double betaSquared = square(gameInfo.getBeta());

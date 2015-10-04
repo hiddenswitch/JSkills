@@ -1,14 +1,30 @@
 package jskills.trueskill;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import jskills.GameInfo;
-import jskills.IPlayer;
-import jskills.ITeam;
+import jskills.Player;
+import jskills.Team;
 import jskills.Rating;
-import jskills.factorgraphs.*;
+import jskills.factorgraphs.Factor;
+import jskills.factorgraphs.FactorGraph;
+import jskills.factorgraphs.FactorGraphLayerBase;
+import jskills.factorgraphs.FactorList;
+import jskills.factorgraphs.KeyedVariable;
+import jskills.factorgraphs.Schedule;
+import jskills.factorgraphs.ScheduleSequence;
 import jskills.numerics.GaussianDistribution;
-import jskills.trueskill.layers.*;
+import jskills.trueskill.layers.IteratedTeamDifferencesInnerLayer;
+import jskills.trueskill.layers.PlayerPerformancesToTeamPerformancesLayer;
+import jskills.trueskill.layers.PlayerPriorValuesToSkillsLayer;
+import jskills.trueskill.layers.PlayerSkillsToPerformancesLayer;
+import jskills.trueskill.layers.TeamDifferencesComparisonLayer;
+import jskills.trueskill.layers.TeamPerformancesToTeamPerformanceDifferencesLayer;
 
-import java.util.*;
 
 public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
 
@@ -16,7 +32,7 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
     private final PlayerPriorValuesToSkillsLayer priorLayer;
     private GameInfo gameInfo;
 
-    public TrueSkillFactorGraph(GameInfo gameInfo, Collection<ITeam> teams, int[] teamRanks) {
+    public TrueSkillFactorGraph(GameInfo gameInfo, Collection<Team> teams, int[] teamRanks) {
         this.priorLayer = new PlayerPriorValuesToSkillsLayer(this, teams);
         setGameInfo(gameInfo);
 
@@ -86,10 +102,10 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
         return new ScheduleSequence<>("Full schedule", fullSchedule);
     }
 
-    public Map<IPlayer, Rating> getUpdatedRatings() {
-        Map<IPlayer, Rating> result = new HashMap<>();
-        for(List<KeyedVariable<IPlayer, GaussianDistribution>> currentTeam : priorLayer.getOutputVariablesGroups()) {
-            for(KeyedVariable<IPlayer, GaussianDistribution> currentPlayer : currentTeam) {
+    public Map<Player, Rating> getUpdatedRatings() {
+        Map<Player, Rating> result = new HashMap<>();
+        for(List<KeyedVariable<Player, GaussianDistribution>> currentTeam : priorLayer.getOutputVariablesGroups()) {
+            for(KeyedVariable<Player, GaussianDistribution> currentPlayer : currentTeam) {
                 final Rating rating = new Rating(currentPlayer.getValue().getMean(),
                                                  currentPlayer.getValue().getStandardDeviation());
                 result.put(currentPlayer.getKey(), rating);

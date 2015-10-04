@@ -1,6 +1,5 @@
 package jskills.trueskill.layers;
 
-import jskills.IPlayer;
 import jskills.PartialPlay;
 import jskills.factorgraphs.KeyedVariable;
 import jskills.factorgraphs.Schedule;
@@ -13,19 +12,20 @@ import jskills.trueskill.factors.GaussianWeightedSumFactor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import jskills.Player;
 
 public class PlayerPerformancesToTeamPerformancesLayer extends
-    TrueSkillFactorGraphLayer<KeyedVariable<IPlayer, GaussianDistribution>, 
+    TrueSkillFactorGraphLayer<KeyedVariable<Player, GaussianDistribution>, 
                               GaussianWeightedSumFactor,
                               Variable<GaussianDistribution>> {
-    public PlayerPerformancesToTeamPerformancesLayer(TrueSkillFactorGraph parentGraph)
-    {
+
+    public PlayerPerformancesToTeamPerformancesLayer(TrueSkillFactorGraph parentGraph) {
         super(parentGraph);
     }
 
     @Override
     public void buildLayer() {
-        for(List<KeyedVariable<IPlayer, GaussianDistribution>> currentTeam : getInputVariablesGroups()) {
+        for(List<KeyedVariable<Player, GaussianDistribution>> currentTeam : getInputVariablesGroups()) {
             Variable<GaussianDistribution> teamPerformance = CreateOutputVariable(currentTeam);
             AddLayerFactor(createPlayerToTeamSumFactor(currentTeam, teamPerformance));
 
@@ -43,7 +43,7 @@ public class PlayerPerformancesToTeamPerformancesLayer extends
         return ScheduleSequence(schedules, "all player perf to team perf schedule");
     }
 
-    protected GaussianWeightedSumFactor createPlayerToTeamSumFactor(List<KeyedVariable<IPlayer, GaussianDistribution>> teamMembers,
+    protected GaussianWeightedSumFactor createPlayerToTeamSumFactor(List<KeyedVariable<Player, GaussianDistribution>> teamMembers,
                                                                     Variable<GaussianDistribution> sumVariable) {
         double[] weights = new double[teamMembers.size()];
         for (int i = 0; i < weights.length; i++) {
@@ -68,9 +68,9 @@ public class PlayerPerformancesToTeamPerformancesLayer extends
         return ScheduleSequence(schedules, "all of the team's sum iterations");
     }
 
-    private Variable<GaussianDistribution> CreateOutputVariable(List<KeyedVariable<IPlayer, GaussianDistribution>> team) {
+    private Variable<GaussianDistribution> CreateOutputVariable(List<KeyedVariable<Player, GaussianDistribution>> team) {
         StringBuilder sb = new StringBuilder();
-        for (KeyedVariable<IPlayer, GaussianDistribution> teamMember : team) {
+        for (KeyedVariable<Player, GaussianDistribution> teamMember : team) {
             sb.append(teamMember.getKey().toString());
             sb.append(", ");
         }

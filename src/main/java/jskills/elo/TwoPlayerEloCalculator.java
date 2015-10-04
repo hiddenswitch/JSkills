@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 import jskills.GameInfo;
-import jskills.IPlayer;
+import jskills.Player;
 import jskills.PairwiseComparison;
 import jskills.RankSorter;
 import jskills.Rating;
 import jskills.SkillCalculator;
-import jskills.ITeam;
+import jskills.Team;
 import jskills.numerics.Range;
 
 public abstract class TwoPlayerEloCalculator extends SkillCalculator {
@@ -22,26 +22,26 @@ public abstract class TwoPlayerEloCalculator extends SkillCalculator {
     protected final KFactor kFactor;
 
     protected TwoPlayerEloCalculator(KFactor kFactor) {
-        super(EnumSet.noneOf(SupportedOptions.class), Range.<ITeam> exactly(2),
-                Range.<IPlayer> exactly(1));
+        super(EnumSet.noneOf(SupportedOptions.class), Range.<Team> exactly(2),
+                Range.<Player> exactly(1));
         this.kFactor = kFactor;
     }
 
     @Override
-    public Map<IPlayer, Rating> calculateNewRatings(GameInfo gameInfo,
-            Collection<ITeam> teams, int... teamRanks) {
+    public Map<Player, Rating> calculateNewRatings(GameInfo gameInfo,
+            Collection<Team> teams, int... teamRanks) {
         validateTeamCountAndPlayersCountPerTeam(teams);
-        List<ITeam> teamsl = RankSorter.sort(teams, teamRanks);
+        List<Team> teamsl = RankSorter.sort(teams, teamRanks);
 
-        Map<IPlayer, Rating> result = new HashMap<IPlayer, Rating>();
+        Map<Player, Rating> result = new HashMap<Player, Rating>();
         boolean isDraw = (teamRanks[0] == teamRanks[1]);
 
-        List<IPlayer> players = new ArrayList<IPlayer>(2);
-        for(ITeam team : teamsl)
-            players.add(team.keySet().toArray(new IPlayer[1])[0]);
+        List<Player> players = new ArrayList<Player>(2);
+        for(Team team : teamsl)
+            players.add(team.getPlayer(0));
 
-        double player1Rating = teamsl.get(0).get(players.get(0)).getMean();
-        double player2Rating = teamsl.get(1).get(players.get(1)).getMean();
+        double player1Rating = teamsl.get(0).getRating(players.get(0)).getMean();
+        double player2Rating = teamsl.get(1).getRating(players.get(1)).getMean();
 
         result.put(players.get(0), calculateNewRating(gameInfo, player1Rating, player2Rating, isDraw ? PairwiseComparison.DRAW : PairwiseComparison.WIN));
         result.put(players.get(1), calculateNewRating(gameInfo, player2Rating, player1Rating, isDraw ? PairwiseComparison.DRAW : PairwiseComparison.LOSE));
@@ -74,17 +74,17 @@ public abstract class TwoPlayerEloCalculator extends SkillCalculator {
 
     @Override
     public double calculateMatchQuality(GameInfo gameInfo,
-            Collection<ITeam> teams) {
+            Collection<Team> teams) {
         validateTeamCountAndPlayersCountPerTeam(teams);
         
         // Extract both players from the teams
-        List<IPlayer> players = new ArrayList<IPlayer>(2);
-        for(ITeam team : teams) players.add(team.keySet().toArray(new IPlayer[0])[0]);
+        List<Player> players = new ArrayList<Player>(2);
+        for(Team team : teams) players.add(team.getPlayer(0));
 
         // Extract each player's rating from their team
-        Iterator<ITeam> teamit = teams.iterator();
-        double player1Rating = teamit.next().get(players.get(0)).getMean();
-        double player2Rating = teamit.next().get(players.get(1)).getMean();
+        Iterator<Team> teamit = teams.iterator();
+        double player1Rating = teamit.next().getRating(players.get(0)).getMean();
+        double player2Rating = teamit.next().getRating(players.get(1)).getMean();
 
         // The TrueSkill paper mentions that they used s1 - s2 (rating 
         // difference) to determine match quality. I convert that to a 

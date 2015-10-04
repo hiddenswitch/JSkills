@@ -17,23 +17,23 @@ public class DuellingEloTest {
 
         GameInfo gameInfo = GameInfo.getDefaultGameInfo();
 
-        Player<Integer> player1 = new Player<Integer>(1);
-        Player<Integer> player2 = new Player<Integer>(2);
+        Player<Integer> player1 = new PlayerInfo<Integer>(1);
+        Player<Integer> player2 = new PlayerInfo<Integer>(2);
 
 
-        Team team1 = new Team()
+        Team team1 = new TeamInfo()
             .addPlayer(player1, gameInfo.getDefaultRating())
             .addPlayer(player2, gameInfo.getDefaultRating());
 
-        Player<Integer> player3 = new Player<Integer>(3);
-        Player<Integer> player4 = new Player<Integer>(4);
+        Player<Integer> player3 = new PlayerInfo<Integer>(3);
+        Player<Integer> player4 = new PlayerInfo<Integer>(4);
 
-        Team team2 = new Team()
+        Team team2 = new TeamInfo()
                     .addPlayer(player3, gameInfo.getDefaultRating())
                     .addPlayer(player4, gameInfo.getDefaultRating());
 
-        Collection<ITeam> teams = Team.concat(team2, team1);
-        Map<IPlayer, Rating> newRatingsWinLose = calculator.calculateNewRatings(gameInfo, teams, 2, 1);
+        Collection<Team> teams = TeamInfo.concat(team2, team1);
+        Map<Player, Rating> newRatingsWinLose = calculator.calculateNewRatings(gameInfo, teams, 2, 1);
 
         // TODO: Verify?
         AssertRating(37, newRatingsWinLose.get(player1));
