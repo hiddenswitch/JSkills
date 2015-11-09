@@ -5,7 +5,7 @@ import jskills.factorgraphs.KeyedVariable;
 import jskills.factorgraphs.Schedule;
 import jskills.factorgraphs.ScheduleStep;
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 import jskills.trueskill.TrueSkillFactorGraph;
 import jskills.trueskill.factors.GaussianWeightedSumFactor;
 

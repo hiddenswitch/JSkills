@@ -1,7 +1,7 @@
 package jskills.trueskill.layers;
 
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 import jskills.trueskill.TrueSkillFactorGraph;
 import jskills.trueskill.factors.GaussianWeightedSumFactor;
 

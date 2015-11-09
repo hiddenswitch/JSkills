@@ -1,4 +1,4 @@
-package jskills.numerics;
+package jskills.util;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -7,7 +7,7 @@ import static java.lang.Math.log;
 import static java.lang.Math.max;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
-import static jskills.numerics.MathUtils.square;
+import static jskills.util.MathUtils.square;
 import jskills.Rating;
 
 /**

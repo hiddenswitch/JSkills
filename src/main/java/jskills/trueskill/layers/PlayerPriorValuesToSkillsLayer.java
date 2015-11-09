@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import jskills.Rating;
-import jskills.numerics.GaussianDistribution;
-import jskills.numerics.MathUtils;
+import jskills.util.GaussianDistribution;
+import jskills.util.MathUtils;
 import jskills.trueskill.TrueSkillFactorGraph;
 import jskills.trueskill.factors.GaussianPriorFactor;
 import jskills.Player;

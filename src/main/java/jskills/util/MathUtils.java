@@ -1,4 +1,4 @@
-package jskills.numerics;
+package jskills.util;
 
 import java.util.Collection;
 

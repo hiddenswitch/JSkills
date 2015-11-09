@@ -11,11 +11,11 @@ import java.util.Map;
 import jskills.GameInfo;
 import jskills.Player;
 import jskills.PairwiseComparison;
-import jskills.RankSorter;
+import jskills.util.RankSorter;
 import jskills.Rating;
 import jskills.SkillCalculator;
 import jskills.Team;
-import jskills.numerics.Range;
+import jskills.util.Range;
 
 public abstract class TwoPlayerEloCalculator extends SkillCalculator {
 

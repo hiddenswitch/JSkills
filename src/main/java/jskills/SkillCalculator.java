@@ -1,6 +1,7 @@
 package jskills;
 
-import jskills.numerics.Range;
+import jskills.util.Guard;
+import jskills.util.Range;
 
 import java.util.Collection;
 import java.util.EnumSet;

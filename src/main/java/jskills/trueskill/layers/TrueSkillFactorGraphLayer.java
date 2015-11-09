@@ -3,7 +3,7 @@ package jskills.trueskill.layers;
 import jskills.factorgraphs.Factor;
 import jskills.factorgraphs.FactorGraphLayer;
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 import jskills.trueskill.TrueSkillFactorGraph;
 
 public abstract class TrueSkillFactorGraphLayer<TInputVariable extends Variable<GaussianDistribution>, 

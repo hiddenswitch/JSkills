@@ -3,8 +3,8 @@ package jskills.trueskill.layers;
 import jskills.factorgraphs.KeyedVariable;
 import jskills.factorgraphs.Schedule;
 import jskills.factorgraphs.ScheduleStep;
-import jskills.numerics.GaussianDistribution;
-import jskills.numerics.MathUtils;
+import jskills.util.GaussianDistribution;
+import jskills.util.MathUtils;
 import jskills.trueskill.TrueSkillFactorGraph;
 import jskills.trueskill.factors.GaussianLikelihoodFactor;
 

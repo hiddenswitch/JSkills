@@ -1,21 +1,21 @@
 package jskills.trueskill;
 
-import jskills.numerics.Range;
+import jskills.util.Range;
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.*;
 import jskills.GameInfo;
-import jskills.Guard;
+import jskills.util.Guard;
 import jskills.PartialPlay;
 import jskills.Player;
-import jskills.RankSorter;
+import jskills.util.RankSorter;
 import jskills.Rating;
 import jskills.RatingUpdates;
 import jskills.SkillCalculator;
 import jskills.SkillCalculator.SupportedOptions;
 import jskills.Team;
 
-import static jskills.numerics.MathUtils.square;
+import static jskills.util.MathUtils.square;
 
 /**
  * Calculates TrueSkill using a full factor graph.
@@ -39,6 +39,7 @@ public class FactorGraphTrueSkillCalculator extends SkillCalculator {
 
         TrueSkillFactorGraph factorGraph = new TrueSkillFactorGraph(gameInfo, teamsl, teamRanks);
         factorGraph.buildGraph();
+        System.out.println(factorGraph.getProbabilityOfRanking());
         factorGraph.runSchedule();
 
         double probabilityOfOutcome = factorGraph.getProbabilityOfRanking();

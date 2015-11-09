@@ -1,4 +1,4 @@
-package jskills.numerics;
+package jskills.util;
 
 import org.ejml.simple.SimpleMatrix;
 import org.junit.Test;

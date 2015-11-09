@@ -10,13 +10,13 @@ import jskills.GameInfo;
 import jskills.PairwiseComparison;
 import jskills.Player;
 import jskills.PlayerInfo;
-import jskills.RankSorter;
+import jskills.util.RankSorter;
 import jskills.Rating;
 import jskills.SkillCalculator;
 import jskills.Team;
 import jskills.TeamInfo;
-import jskills.numerics.MathUtils;
-import jskills.numerics.Range;
+import jskills.util.MathUtils;
+import jskills.util.Range;
 
 public class DuellingEloCalculator extends SkillCalculator {
 

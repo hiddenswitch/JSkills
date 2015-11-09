@@ -1,10 +1,10 @@
 package jskills;
 
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 
 import java.util.Collection;
 
-import static jskills.numerics.MathUtils.square;
+import static jskills.util.MathUtils.square;
 
 /**
  * Container for a player's rating.

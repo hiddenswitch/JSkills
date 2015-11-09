@@ -1,7 +1,7 @@
 package jskills.elo;
 
 import jskills.GameInfo;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 
 public class GaussianEloCalculator extends TwoPlayerEloCalculator {
     // From the paper

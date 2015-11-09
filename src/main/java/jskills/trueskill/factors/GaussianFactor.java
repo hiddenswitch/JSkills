@@ -3,9 +3,8 @@ package jskills.trueskill.factors;
 import jskills.factorgraphs.Factor;
 import jskills.factorgraphs.Message;
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
-
-import static jskills.numerics.GaussianDistribution.logProductNormalization;
+import jskills.util.GaussianDistribution;
+import static jskills.util.GaussianDistribution.logProductNormalization;
 
 public abstract class GaussianFactor extends Factor<GaussianDistribution> {
 

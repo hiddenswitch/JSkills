@@ -1,4 +1,4 @@
-package jskills.numerics;
+package jskills.util;
 
 /**
  * A very limited implementation of an immutable range of Integers, including

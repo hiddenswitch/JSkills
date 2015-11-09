@@ -2,8 +2,8 @@ package jskills.trueskill.factors;
 
 import jskills.factorgraphs.Message;
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
-import static jskills.numerics.GaussianDistribution.*;
+import jskills.util.GaussianDistribution;
+import static jskills.util.GaussianDistribution.*;
 import static jskills.trueskill.TruncatedGaussianCorrectionFunctions.*;
 
 /**

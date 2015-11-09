@@ -1,6 +1,6 @@
 package jskills.trueskill;
 
-import static jskills.numerics.GaussianDistribution.*;
+import static jskills.util.GaussianDistribution.*;
 
 /**
  * These functions are from the bottom of page 4 of the TrueSkill paper.

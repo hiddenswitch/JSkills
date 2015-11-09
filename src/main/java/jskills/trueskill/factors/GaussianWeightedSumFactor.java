@@ -1,15 +1,15 @@
 package jskills.trueskill.factors;
 
-import jskills.Guard;
+import jskills.util.Guard;
 import jskills.factorgraphs.Message;
 import jskills.factorgraphs.Variable;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static jskills.numerics.GaussianDistribution.*;
+import static jskills.util.GaussianDistribution.*;
 
 /**
  * Factor that sums together multiple Gaussians.

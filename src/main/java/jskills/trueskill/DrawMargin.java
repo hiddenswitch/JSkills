@@ -1,6 +1,6 @@
 package jskills.trueskill;
 
-import static jskills.numerics.GaussianDistribution.*;
+import static jskills.util.GaussianDistribution.*;
 
 public class DrawMargin {
 

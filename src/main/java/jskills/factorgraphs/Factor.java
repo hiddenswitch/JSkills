@@ -2,7 +2,7 @@ package jskills.factorgraphs;
 
 import java.util.*;
 
-import static jskills.Guard.argumentIsValidIndex;
+import static jskills.util.Guard.argumentIsValidIndex;
 
 public abstract class Factor<TValue> {
 

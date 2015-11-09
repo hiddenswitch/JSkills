@@ -1,9 +1,10 @@
-package jskills.numerics;
+package jskills.util;
 
+import jskills.util.GaussianDistribution;
 import org.junit.Test;
 
 import static java.lang.Math.sqrt;
-import static jskills.numerics.MathUtils.square;
+import static jskills.util.MathUtils.square;
 import static org.junit.Assert.assertEquals;
 
 public class GaussianDistributionTests {

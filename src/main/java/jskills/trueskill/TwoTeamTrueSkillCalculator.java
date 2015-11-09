@@ -7,21 +7,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import jskills.GameInfo;
-import jskills.Guard;
+import jskills.util.Guard;
 import jskills.PairwiseComparison;
 import static jskills.PairwiseComparison.DRAW;
 import static jskills.PairwiseComparison.LOSE;
 import static jskills.PairwiseComparison.WIN;
 import jskills.Player;
-import jskills.RankSorter;
+import jskills.util.RankSorter;
 import jskills.Rating;
 import jskills.SkillCalculator;
 import jskills.SkillCalculator.SupportedOptions;
 import jskills.Team;
-import jskills.numerics.Range;
-
-
-import static jskills.numerics.MathUtils.square;
+import jskills.util.Range;
+import static jskills.util.MathUtils.square;
 
 /**
  * Calculates new ratings for only two teams where each team has 1 or more players.

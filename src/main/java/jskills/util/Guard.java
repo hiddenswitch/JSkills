@@ -1,4 +1,4 @@
-package jskills;
+package jskills.util;
 
 /**
  * Verifies argument contracts.

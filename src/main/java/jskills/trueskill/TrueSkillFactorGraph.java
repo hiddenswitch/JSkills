@@ -17,7 +17,7 @@ import jskills.factorgraphs.FactorList;
 import jskills.factorgraphs.KeyedVariable;
 import jskills.factorgraphs.Schedule;
 import jskills.factorgraphs.ScheduleSequence;
-import jskills.numerics.GaussianDistribution;
+import jskills.util.GaussianDistribution;
 import jskills.trueskill.layers.IteratedTeamDifferencesInnerLayer;
 import jskills.trueskill.layers.PlayerPerformancesToTeamPerformancesLayer;
 import jskills.trueskill.layers.PlayerPriorValuesToSkillsLayer;
@@ -52,7 +52,7 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
     public void buildGraph() {
         Object lastOutput = null;
 
-        for(FactorGraphLayerBase<GaussianDistribution> currentLayer : layers) {
+        for (FactorGraphLayerBase<GaussianDistribution> currentLayer : layers) {
             if (lastOutput != null)
                 currentLayer.setRawInputVariablesGroups(lastOutput);
 
@@ -70,8 +70,8 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
     public double getProbabilityOfRanking() {
         FactorList<GaussianDistribution> factorList = new FactorList<>();
 
-        for(FactorGraphLayerBase<GaussianDistribution> currentLayer : layers) {
-            for(Factor<GaussianDistribution> currentFactor :currentLayer.getUntypedFactors()) {
+        for (FactorGraphLayerBase<GaussianDistribution> currentLayer : layers) {
+            for (Factor<GaussianDistribution> currentFactor: currentLayer.getUntypedFactors()) {
                 factorList.addFactor(currentFactor);
             }
         }
@@ -83,20 +83,22 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
     private Schedule<GaussianDistribution> createFullSchedule() {
         List<Schedule<GaussianDistribution>> fullSchedule = new ArrayList<>();
 
-        for(FactorGraphLayerBase<GaussianDistribution> currentLayer : layers) {
+        for (FactorGraphLayerBase<GaussianDistribution> currentLayer: layers) {
             Schedule<GaussianDistribution> currentPriorSchedule = currentLayer.createPriorSchedule();
-            if (currentPriorSchedule != null)
+            if (currentPriorSchedule != null) {
                 fullSchedule.add(currentPriorSchedule);
+            }
         }
 
         // Getting as a list to use reverse()
         List<FactorGraphLayerBase<GaussianDistribution>> allLayers = new ArrayList<>(layers);
         Collections.reverse(allLayers);
 
-        for(FactorGraphLayerBase<GaussianDistribution> currentLayer : allLayers) {
+        for (FactorGraphLayerBase<GaussianDistribution> currentLayer: allLayers) {
             Schedule<GaussianDistribution> currentPosteriorSchedule = currentLayer.createPosteriorSchedule();
-            if (currentPosteriorSchedule != null)
+            if (currentPosteriorSchedule != null) {
                 fullSchedule.add(currentPosteriorSchedule);
+            }
         }
 
         return new ScheduleSequence<>("Full schedule", fullSchedule);
@@ -104,8 +106,8 @@ public class TrueSkillFactorGraph extends FactorGraph<TrueSkillFactorGraph> {
 
     public Map<Player, Rating> getUpdatedRatings() {
         Map<Player, Rating> result = new HashMap<>();
-        for(List<KeyedVariable<Player, GaussianDistribution>> currentTeam : priorLayer.getOutputVariablesGroups()) {
-            for(KeyedVariable<Player, GaussianDistribution> currentPlayer : currentTeam) {
+        for (List<KeyedVariable<Player, GaussianDistribution>> currentTeam: priorLayer.getOutputVariablesGroups()) {
+            for (KeyedVariable<Player, GaussianDistribution> currentPlayer: currentTeam) {
                 final Rating rating = new Rating(currentPlayer.getValue().getMean(),
                                                  currentPlayer.getValue().getStandardDeviation());
                 result.put(currentPlayer.getKey(), rating);

@@ -1,5 +1,6 @@
-package jskills;
+package jskills.util;
 
+import jskills.util.RankSorter;
 import org.junit.Test;
 
 import java.util.Arrays;
